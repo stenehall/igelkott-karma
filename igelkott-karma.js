@@ -53,10 +53,10 @@ Karma.prototype._karma = function _karma(message) {
         that.igelkott.push(karma_reply);
       }
     });
-    console.log('New object created with objectId: ' + trans.id);
-  }, function(error) {
-    console.log('Failed to create new object, with error code: ' + error.description);
-  });
+    this.igelkott.log('New object created with objectId: ' + trans.id);
+  }.bind(this), function(error) {
+    this.igelkott.log('Failed to create new object, with error code: ' + error.description);
+  }.bind(this));
 }
 
 
