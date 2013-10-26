@@ -1,4 +1,5 @@
 var Karma = function Karma() {
+
   this.listeners = {'trigger:karma': this.karma, 'internal:karma': this._karma, PRIVMSG: this.privmsg_karma};
   this.requireDB = true;
 
@@ -13,51 +14,38 @@ Karma.prototype.privmsg_karma = function privmsg_karma(message) {
   var match = message.parameters[1].match(/\w+(--|\+\+)/);
   if (match)
   {
-    message.parameters[1] = '!karma '+match[0];
-    this.igelkott.emit('trigger:karma', message);
+    var noMatch = message.parameters[1].match(/!karma/);
+    if (noMatch === null)
+    {
+      message.parameters[1] = '!karma '+match[0];
+      this.igelkott.emit('trigger:karma', message);
+    }
   }
 
-}
+};
 
 Karma.prototype._karma = function _karma(message) {
 
   var karma_nick = message.parameters[1].split(' ')[1];
   var karma = (/--$/.test(karma_nick)) ? -1 : 1;
 
-  karma_nick = karma_nick.replace('--','').replace('++', '')
+  karma_nick = karma_nick.replace('--','').replace('++', '');
   var obj = {
     'to': karma_nick,
     'from': message.prefix.nick,
     'karma': karma
-  }
+  };
 
-  var that = this;
+  var igelkott = this.igelkott;
 
-  var Karma = this.db.Object.extend("karma");
-  new Karma().save(obj).then(function(trans) {
-    var query = new that.db.Query(Karma);
-    query.equalTo("to", karma_nick);
-    query.find({
-      success: function(karmas) {
-
-        var count = 0;
-        for (var i in karmas)
-        {
-          count += karmas[i].get('karma');
-        }
-
-        var karma_reply = {
-          command: 'PRIVMSG',
-          parameters: [message.parameters[0], karma_nick+' now has '+count+' karma']
-        };
-        that.igelkott.push(karma_reply);
-      }
-    });
-    this.igelkott.log('New object created with objectId: ' + trans.id);
-  }.bind(this), function(error) {
-    this.igelkott.log('Failed to create new object, with error code: ' + error.description);
+  this.addRecord(obj, function(result) {
+    var karma_reply = {
+      command: 'PRIVMSG',
+      parameters: [message.parameters[0], obj.to+' now has '+result+' karma']
+    };
+    this.igelkott.push(karma_reply);
   }.bind(this));
-}
+};
 
 
 Karma.prototype.karma = function karma(message) {
@@ -80,6 +68,28 @@ Karma.prototype.karma = function karma(message) {
     parameters: [message.prefix.nick]
   };
   this.igelkott.push(whois); // Push a whois
+};
+
+Karma.prototype.addRecord = function addRecord(obj, callback) {
+  var Karma = this.igelkott.db.Object.extend("karma");
+  new Karma().save(obj).then(function(trans) {
+    var query = new this.igelkott.db.Query(Karma);
+    query.equalTo("to", obj.to);
+    query.find({
+      success: function(karmas) {
+
+        var count = 0;
+        for (var i in karmas)
+        {
+          count += karmas[i].get('karma');
+        }
+        callback(count);
+      }
+    });
+    this.igelkott.log('New object created with objectId: ' + trans.id);
+  }.bind(this), function(error) {
+    this.igelkott.log('Failed to create new object, with error code: ' + error.description);
+  }.bind(this));
 };
 
 exports.Plugin = Karma;
