@@ -3,6 +3,8 @@ var Karma = function Karma() {
   this.listeners = {'trigger:karma': this.karma, 'internal:karma': this._karma, PRIVMSG: this.privmsg_karma};
   this.requireDB = true;
 
+  this.throttleProtection = {};
+
   this.name = 'karma';
   this.help = {
     "default": "Give karma to a user by either using the !karma trigger or simply nickname++ or nickname--"
@@ -39,6 +41,9 @@ Karma.prototype._karma = function _karma(message) {
   var igelkott = this.igelkott;
 
   this.addRecord(obj, function(result) {
+
+    this.throttleProtection[message.prefix.nick] = (new Date()).getTime() + 1000 * 60;
+
     var karma_reply = {
       command: 'PRIVMSG',
       parameters: [message.parameters[0], obj.to+' now has '+result+' karma']
@@ -49,6 +54,16 @@ Karma.prototype._karma = function _karma(message) {
 
 
 Karma.prototype.karma = function karma(message) {
+
+  if (this.throttleProtection[message.prefix.nick] !== undefined && this.throttleProtection[message.prefix.nick] > (new Date()).getTime())
+  {
+    var karma_reply = {
+      command: 'PRIVMSG',
+      parameters: [message.parameters[0], message.prefix.nick+' stop spaming!']
+    };
+    this.igelkott.push(karma_reply);
+    return;
+  }
 
   var obj = {
     command: 'internal:karma', // Internal function to give karma if trigger matches
