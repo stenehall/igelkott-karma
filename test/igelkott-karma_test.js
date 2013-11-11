@@ -8,7 +8,6 @@ var assert = require('chai').assert,
 
 
 function cleanParseClass(igelkott, className, callback) {
-
   var query = new igelkott.db.Query(className);
   query.find().then(function(results) {
     var promise = igelkott.db.Promise.as();
@@ -24,9 +23,7 @@ function cleanParseClass(igelkott, className, callback) {
 }
 
 
-
 describe('Karma', function() {
-
   var igelkott,
       config,
       s,
@@ -47,8 +44,8 @@ describe('Karma', function() {
     igelkott = new Igelkott(config);
   });
 
-  it('Should listen to !karma and make sure the user is identified', function(done) {
 
+  it('Should listen to !karma and make sure the user is identified', function(done) {
     this.timeout(50000); // DB queries are slow
     igelkott.plugin.load('karma', Karma);
 
@@ -94,7 +91,6 @@ describe('Karma', function() {
 
 
   it('Should listen to -- and inline text', function(done) {
-
     this.timeout(50000); // DB queries are slow
     igelkott.plugin.load('karma', Karma);
 
@@ -121,7 +117,5 @@ describe('Karma', function() {
       igelkott.connect();
       s.write(":dsmith!~dsmith@unaffiliated/dsmith PRIVMSG ##botbotbot :Heay, lets give jsmith-- some karma\r\n");
     });
-
   });
-
 });

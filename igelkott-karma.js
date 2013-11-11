@@ -1,5 +1,4 @@
 var Karma = function Karma() {
-
   this.listeners = {'trigger:karma': this.karma, 'internal:karma': this._karma, PRIVMSG: this.privmsg_karma};
   this.requireDB = true;
 
@@ -11,8 +10,8 @@ var Karma = function Karma() {
   };
 };
 
-Karma.prototype.privmsg_karma = function privmsg_karma(message) {
 
+Karma.prototype.privmsg_karma = function privmsg_karma(message) {
   var match = message.parameters[1].match(/\w+(--|\+\+)/);
   if (match)
   {
@@ -26,8 +25,8 @@ Karma.prototype.privmsg_karma = function privmsg_karma(message) {
 
 };
 
-Karma.prototype._karma = function _karma(message) {
 
+Karma.prototype._karma = function _karma(message) {
   var karma_nick = message.parameters[1].split(' ')[1];
   var karma = (/--$/.test(karma_nick)) ? -1 : 1;
 
@@ -54,7 +53,6 @@ Karma.prototype._karma = function _karma(message) {
 
 
 Karma.prototype.karma = function karma(message) {
-
   if (this.throttleProtection[message.prefix.nick] !== undefined && this.throttleProtection[message.prefix.nick] > (new Date()).getTime())
   {
     var karma_reply = {
