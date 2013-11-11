@@ -1,7 +1,7 @@
 {
   "name": "igelkott-karma",
   "description": "Karma plugin for Igelkott",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "igelkott-karma.js",
   "dependencies": {
   },

@@ -85,26 +85,25 @@ Karma.prototype.karma = function karma(message) {
   this.igelkott.push(whois); // Push a whois
 };
 
+
 Karma.prototype.addRecord = function addRecord(obj, callback) {
   var Karma = this.igelkott.db.Object.extend("karma");
   new Karma().save(obj).then(function(trans) {
+    this.igelkott.log('New object created with objectId: ' + trans.id);
+
     var query = new this.igelkott.db.Query(Karma);
     query.equalTo("to", obj.to);
-    query.find({
-      success: function(karmas) {
-
-        var count = 0;
-        for (var i in karmas)
-        {
-          count += karmas[i].get('karma');
-        }
-        callback(count);
-      }
-    });
-    this.igelkott.log('New object created with objectId: ' + trans.id);
+    return query.find();
+  }.bind(this)).then(function(karmas) {
+    var count = 0;
+    for (var i in karmas)
+    {
+      count += karmas[i].get('karma');
+    }
+    callback(count);
   }.bind(this), function(error) {
     this.igelkott.log('Failed to create new object, with error code: ' + error.description);
-  }.bind(this));
+  });
 };
 
 exports.Plugin = Karma;
