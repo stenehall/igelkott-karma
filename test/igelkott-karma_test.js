@@ -33,7 +33,7 @@ describe('Karma', function() {
     s = new Stream.PassThrough({objectMode: true});
 
     config = {
-      plugins:['privmsg'],
+      core:['privmsg'],
       'adapter': s, 'connect': function() { this.server.emit('connect'); },
       "database": {
         "app_id": process.env.APP_ID,
@@ -47,7 +47,7 @@ describe('Karma', function() {
 
   it('Should listen to !karma and make sure the user is identified', function(done) {
     this.timeout(50000); // DB queries are slow
-    igelkott.plugin.load('karma', Karma);
+    igelkott.plugin.load('karma', {}, Karma);
 
     // We need to respond to whois
     s.on('data', function(message) {
@@ -92,7 +92,7 @@ describe('Karma', function() {
 
   it('Should listen to -- and inline text', function(done) {
     this.timeout(50000); // DB queries are slow
-    igelkott.plugin.load('karma', Karma);
+    igelkott.plugin.load('karma', {}, Karma);
 
     // We need to respond to whois
     s.on('data', function(message) {
