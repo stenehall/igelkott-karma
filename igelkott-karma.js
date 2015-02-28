@@ -1,7 +1,7 @@
 var Karma = function Karma() {
 
   this.listeners = {'trigger:karma': this.karma, 'internal:karma': this._karma, PRIVMSG: this.privmsg_karma};
-  this.requireDB = true;
+  this.require = ['parse'];
 
   this.throttleProtection = {};
 
@@ -14,11 +14,9 @@ var Karma = function Karma() {
 Karma.prototype.privmsg_karma = function privmsg_karma(message) {
 
   var match = message.parameters[1].match(/\w+(--|\+\+)/);
-  if (match)
-  {
+  if (match) {
     var noMatch = message.parameters[1].match(/!karma/);
-    if (noMatch === null)
-    {
+    if (noMatch === null){
       message.parameters[1] = '!karma '+match[0];
       this.igelkott.emit('trigger:karma', message);
     }
@@ -55,8 +53,7 @@ Karma.prototype._karma = function _karma(message) {
 
 Karma.prototype.karma = function karma(message) {
 
-  if (this.throttleProtection[message.prefix.nick] !== undefined && this.throttleProtection[message.prefix.nick] > (new Date()).getTime())
-  {
+  if (this.throttleProtection[message.prefix.nick] !== undefined && this.throttleProtection[message.prefix.nick] > (new Date()).getTime()) {
     var karma_reply = {
       command: 'PRIVMSG',
       parameters: [message.parameters[0], message.prefix.nick+' stop spaming!']
@@ -86,16 +83,14 @@ Karma.prototype.karma = function karma(message) {
 };
 
 Karma.prototype.addRecord = function addRecord(obj, callback) {
-  var Karma = this.igelkott.db.Object.extend("karma");
+  var Karma = this.igelkott.parse.Object.extend("karma");
   new Karma().save(obj).then(function(trans) {
-    var query = new this.igelkott.db.Query(Karma);
+    var query = new this.igelkott.parse.Query(Karma);
     query.equalTo("to", obj.to);
     query.find({
       success: function(karmas) {
-
         var count = 0;
-        for (var i in karmas)
-        {
+        for (var i in karmas) {
           count += karmas[i].get('karma');
         }
         callback(count);
@@ -103,8 +98,9 @@ Karma.prototype.addRecord = function addRecord(obj, callback) {
     });
     this.igelkott.log('New object created with objectId: ' + trans.id);
   }.bind(this), function(error) {
-    this.igelkott.log('Failed to create new object, with error code: ' + error.description);
+    this.igelkott.error('Failed to create new object, with error code: ' + error.description);
   }.bind(this));
 };
 
 exports.Plugin = Karma;
+
